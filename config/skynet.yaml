@@ -1,0 +1,115 @@
+# Skynet 配置文件
+
+skynet:
+  project_name: "Skynet"
+  target_dir: "./goalfile"
+  output_dir: "./reports"
+
+  graph:
+    dir_name: ".skynet"
+    db_name: "graph.db"
+    full_rebuild: false
+    analyzable_kinds:
+      - Function
+      - Class
+    context_max_neighbors: 12
+    context_max_depth: 1
+
+  llm:
+    # 密钥与端点通过环境变量注入（见 .env.example）
+    api_base_url: "https://api.deepseek.com/v1"
+    model_name: "deepseek-chat"
+    temperature: 0.1
+    max_tokens: 8000
+    timeout: 60.0
+
+  analyze:
+    max_concurrency: 3
+    max_source_lines: 400
+    include_tests: false
+    output_dir: "./reports"
+    confidence_search_threshold: 0.55
+
+  scan:
+    limit_chunks: 0
+    skip_build: false
+    no_trace: false
+    no_composite: false
+
+  knowledge:
+    external_dir: ""          # 默认 data/knowledge/external
+    max_external_items: 8
+    persist_internal: true
+    enable_external: true
+    enable_internal: true
+
+  web_search:
+    enabled: false
+    provider: "duckduckgo"    # duckduckgo | tavily
+    max_results: 5
+    max_queries: 2
+
+  taint:
+    enabled: true
+    knowledge_dir: ""
+    max_hops: 8
+    max_paths_per_sink: 5
+    max_flow_traces: 30
+    min_criticality: 0.0
+    cache_flow_results: true
+    enable_composite: true
+    max_composite_clusters: 10
+    auto_trace_on_analyze: true
+
+    gap_bare_call_weight: 30
+    gap_dangling_target_weight: 40
+    gap_path_break_weight: 35
+    gap_dynamic_call_weight: 25
+    gap_sink_unreachable_weight: 15
+    gap_low_confidence_weight: 20
+    gap_cross_community_weight: 10
+    gap_missing_node_weight: 25
+    gap_agent_threshold: 50
+    gap_ignore_prefixes: ["sqlite3.", "os.", "_io.", "builtins."]
+    gap_ignore_bare_names:
+      - connect
+      - cursor
+      - execute
+      - fetchall
+      - fetchone
+      - commit
+      - close
+      - open
+      - read
+      - write
+    gap_builtin_downweight: 0.0
+
+    agent_fallback: true
+    agent_max_steps: 5
+    max_agent_per_run: 20
+    agent_after_inconclusive: true
+
+  lsp:
+    enabled: true
+    code_language: ""       # 空=自动检测 (python/typescript/...)
+    trace_lsp_communication: false
+    startup_timeout: 45.0
+
+  resilience:
+    circuit_breaker_enabled: true
+    retry_enabled: true
+    prompt_cache_enabled: true
+
+  framework_knowledge:
+    enabled: true
+
+  vuln_pattern:
+    enabled: true
+
+  external_scanner:
+    enabled: true
+    tools: ["bandit"]
+    timeout: 120
+
+  verify:
+    enabled: false

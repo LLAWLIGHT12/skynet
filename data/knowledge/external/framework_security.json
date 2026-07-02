@@ -1,0 +1,747 @@
+{
+  "flask": {
+    "name": "Flask",
+    "detection_patterns": [
+      "from flask import",
+      "import flask",
+      "from flask.",
+      "Flask(__name__)"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "flask_ssti",
+        "title": "Server-Side Template Injection (SSTI)",
+        "cwe_ids": ["CWE-1336"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "render_template_string(user_input)",
+            "description": "直接渲染用户输入为模板，导致 SSTI",
+            "language": "python"
+          },
+          {
+            "code": "Template(user_input).render()",
+            "description": "Jinja2 模板直接渲染用户输入",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "render_template('template.html', user_var=user_input)",
+            "description": "使用模板文件，通过变量传递用户输入"
+          }
+        ]
+      },
+      {
+        "id": "flask_xss",
+        "title": "Cross-Site Scripting (XSS)",
+        "cwe_ids": ["CWE-79"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "Markup(user_input)",
+            "description": "Markup 直接标记用户输入为安全 HTML",
+            "language": "python"
+          },
+          {
+            "code": "|safe filter on user input",
+            "description": "在模板中对用户输入使用 |safe 过滤器",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "escape(user_input)",
+            "description": "使用 escape 函数转义用户输入"
+          }
+        ]
+      },
+      {
+        "id": "flask_sql_injection",
+        "title": "SQL Injection",
+        "cwe_ids": ["CWE-89"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "db.execute(f\"SELECT * FROM users WHERE id = {user_id}\")",
+            "description": "f-string 拼接 SQL 查询",
+            "language": "python"
+          },
+          {
+            "code": "db.execute(\"SELECT * FROM users WHERE id = \" + user_id)",
+            "description": "字符串拼接 SQL 查询",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "db.execute(\"SELECT * FROM users WHERE id = :id\", {\"id\": user_id})",
+            "description": "使用参数化查询"
+          }
+        ]
+      },
+      {
+        "id": "flask_debug_mode",
+        "title": "Debug Mode Enabled in Production",
+        "cwe_ids": ["CWE-489"],
+        "owasp_ids": ["A05:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "app.run(debug=True)",
+            "description": "生产环境启用 Debug 模式，暴露调试器和敏感信息",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "app.run(debug=False)",
+            "description": "生产环境禁用 Debug 模式"
+          }
+        ]
+      },
+      {
+        "id": "flask_file_upload",
+        "title": "Insecure File Upload",
+        "cwe_ids": ["CWE-434"],
+        "owasp_ids": ["A04:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "file.save(os.path.join(upload_dir, filename))",
+            "description": "直接使用用户提供的文件名保存，可能导致路径遍历",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "filename = werkzeug.utils.secure_filename(filename)\nfile.save(os.path.join(upload_dir, filename))",
+            "description": "使用 secure_filename 清理文件名"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 Flask-Talisman 设置安全 HTTP 头",
+      "使用 Flask-WTF 处理 CSRF 保护",
+      "使用 Flask-Login 管理用户会话",
+      "设置 SESSION_COOKIE_SECURE 和 SESSION_COOKIE_HTTPONLY",
+      "使用 SECRET_KEY 环境变量，不要硬编码"
+    ]
+  },
+  "django": {
+    "name": "Django",
+    "detection_patterns": [
+      "from django.",
+      "import django",
+      "django.conf",
+      "from django.http",
+      "from django.db"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "django_raw_sql",
+        "title": "Raw SQL Query",
+        "cwe_ids": ["CWE-89"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "User.objects.raw(f\"SELECT * FROM users WHERE id = {user_id}\")",
+            "description": "raw() 查询使用 f-string 拼接",
+            "language": "python"
+          },
+          {
+            "code": "cursor.execute(f\"SELECT * FROM users WHERE name = '{name}'\")",
+            "description": "cursor.execute 使用 f-string 拼接",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "User.objects.raw(\"SELECT * FROM users WHERE id = %s\", [user_id])",
+            "description": "raw() 使用参数化查询"
+          },
+          {
+            "code": "cursor.execute(\"SELECT * FROM users WHERE name = %s\", [name])",
+            "description": "cursor.execute 使用参数化查询"
+          }
+        ]
+      },
+      {
+        "id": "django_mark_safe",
+        "title": "mark_safe XSS Vulnerability",
+        "cwe_ids": ["CWE-79"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "mark_safe(user_input)",
+            "description": "mark_safe 直接标记用户输入为安全 HTML",
+            "language": "python"
+          },
+          {
+            "code": "format_html(user_input)",
+            "description": "format_html 直接传入用户输入（应使用参数化）",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "format_html(\"<strong>{}</strong>\", user_input)",
+            "description": "format_html 使用参数化，自动转义用户输入"
+          }
+        ]
+      },
+      {
+        "id": "django_csrf_exempt",
+        "title": "CSRF Protection Disabled",
+        "cwe_ids": ["CWE-352"],
+        "owasp_ids": ["A01:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "@csrf_exempt",
+            "description": "使用 csrf_exempt 装饰器禁用 CSRF 保护",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "使用 CSRF token 并在表单中包含 {% csrf_token %}",
+            "description": "保持 CSRF 保护启用"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 Django ORM 而非 raw SQL",
+      "保持 DEBUG=False 在生产环境",
+      "设置 SECURE_SSL_REDIRECT=True",
+      "使用 django.middleware.security.SecurityMiddleware",
+      "设置 ALLOWED_HOSTS 明确列表"
+    ]
+  },
+  "fastapi": {
+    "name": "FastAPI",
+    "detection_patterns": [
+      "from fastapi import",
+      "import fastapi",
+      "FastAPI()",
+      "from fastapi."
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "fastapi_no_validation",
+        "title": "Missing Input Validation",
+        "cwe_ids": ["CWE-20"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "@app.get(\"/items/{item_id}\")\nasync def read_item(item_id: str):",
+            "description": "直接使用 str 类型，缺少 Pydantic 验证",
+            "language": "python"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "class ItemID(BaseModel):\n    item_id: int = Field(gt=0)\n\n@app.get(\"/items/{item_id}\")\nasync def read_item(item: ItemID):",
+            "description": "使用 Pydantic 模型进行输入验证"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 Pydantic 模型进行严格的输入验证",
+      "使用 OAuth2 或 JWT 进行身份验证",
+      "设置 CORS 中间件明确允许的源",
+      "使用 HTTPS 和安全的 Cookie 配置"
+    ]
+  },
+  "express": {
+    "name": "Express.js",
+    "detection_patterns": [
+      "require('express')",
+      "require(\"express\")",
+      "from 'express'",
+      "from \"express\"",
+      "express()"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "express_nosql_injection",
+        "title": "NoSQL Injection",
+        "cwe_ids": ["CWE-943"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "db.collection.find({ username: req.body.username })",
+            "description": "直接将用户输入传入 MongoDB 查询",
+            "language": "javascript"
+          },
+          {
+            "code": "User.findOne({ $where: req.body.query })",
+            "description": "$where 操作符执行任意 JavaScript",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "const username = String(req.body.username);\ndb.collection.find({ username: username })",
+            "description": "强制转换为字符串类型"
+          }
+        ]
+      },
+      {
+        "id": "express_prototype_pollution",
+        "title": "Prototype Pollution",
+        "cwe_ids": ["CWE-1321"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "Object.assign(target, req.body)",
+            "description": "直接将用户输入合并到对象",
+            "language": "javascript"
+          },
+          {
+            "code": "_.merge(target, req.body)",
+            "description": "Lodash merge 未过滤 __proto__",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "const allowed = pick(req.body, ['name', 'email']);\nObject.assign(target, allowed)",
+            "description": "使用白名单选择允许的字段"
+          }
+        ]
+      },
+      {
+        "id": "express_path_traversal",
+        "title": "Path Traversal",
+        "cwe_ids": ["CWE-22"],
+        "owasp_ids": ["A01:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "res.sendFile(req.params.filename)",
+            "description": "直接使用用户输入作为文件路径",
+            "language": "javascript"
+          },
+          {
+            "code": "fs.readFileSync(req.query.path)",
+            "description": "读取用户指定的任意文件",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "const path = require('path');\nconst safePath = path.join(baseDir, path.basename(req.params.filename));\nres.sendFile(safePath)",
+            "description": "使用 path.basename 和 path.join 限制在基础目录内"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 helmet 中间件设置安全 HTTP 头",
+      "使用 express-rate-limit 防止暴力破解",
+      "使用 express-validator 验证用户输入",
+      "避免使用 eval() 和 new Function()",
+      "使用参数化查询或 ORM 防止注入"
+    ]
+  },
+  "springboot": {
+    "name": "Spring Boot",
+    "detection_patterns": [
+      "import org.springframework",
+      "@SpringBootApplication",
+      "@RestController",
+      "@Controller",
+      "@Service"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "spring_spel_injection",
+        "title": "Spring Expression Language (SpEL) Injection",
+        "cwe_ids": ["CWE-94"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "expressionParser.parseExpression(userInput).getValue()",
+            "description": "直接解析用户输入的 SpEL 表达式，可导致 RCE",
+            "language": "java"
+          },
+          {
+            "code": "@Value(\"#{userInput}\")",
+            "description": "@Value 注解中使用 SpEL 解析用户输入",
+            "language": "java"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "expressionParser.parseExpression(safeTemplate).getValue(ctx)",
+            "description": "使用预定义的表达式模板与安全上下文"
+          }
+        ]
+      },
+      {
+        "id": "spring_actuator_exposure",
+        "title": "Actuator Endpoints Exposed Without Authentication",
+        "cwe_ids": ["CWE-200"],
+        "owasp_ids": ["A01:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "management.endpoints.web.exposure.include=*",
+            "description": "Actuator 所有端点暴露，包含 heapdump/env/metrics",
+            "language": "java"
+          },
+          {
+            "code": "management.endpoint.health.show-details=always",
+            "description": "健康检查暴露详细的依赖组件信息",
+            "language": "java"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "management.endpoints.web.exposure.include=health,info\nmanagement.security.enabled=true",
+            "description": "仅暴露必要端点并启用认证"
+          }
+        ]
+      },
+      {
+        "id": "spring_jackson_deserialization",
+        "title": "Jackson Polymorphic Deserialization",
+        "cwe_ids": ["CWE-502"],
+        "owasp_ids": ["A08:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)",
+            "description": "Jackson 多态反序列化基于类名，可构造恶意 gadget chain",
+            "language": "java"
+          },
+          {
+            "code": "mapper.enableDefaultTyping()",
+            "description": "Jackson 全局启用 default typing",
+            "language": "java"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "使用白名单类型过滤器: mapper.setPolymorphicTypeValidator(...)",
+            "description": "配置 PolymorphicTypeValidator 限制允许的类型"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 Spring Security 进行统一认证与授权",
+      "设置 server.error.include-stacktrace=never",
+      "配置 CSRF 保护（除 API 外）",
+      "使用 spring-security-crypto 做密码哈希",
+      "禁用默认的 TRACE/OPTIONS 方法",
+      "设置 server.forward-headers-strategy=native"
+    ]
+  },
+  "laravel": {
+    "name": "Laravel",
+    "detection_patterns": [
+      "namespace App\\\\",
+      "use Illuminate",
+      "use App\\\\Models",
+      "extends Controller",
+      "Route::"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "laravel_mass_assignment",
+        "title": "Mass Assignment via Eloquent",
+        "cwe_ids": ["CWE-915"],
+        "owasp_ids": ["A01:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "User::create($request->all())",
+            "description": "直接使用所有请求数据创建模型，攻击者可设置 is_admin 等非预期字段",
+            "language": "php"
+          },
+          {
+            "code": "$user->update($request->all())",
+            "description": "直接使用所有请求数据更新模型",
+            "language": "php"
+          },
+          {
+            "code": "protected $guarded = [];",
+            "description": "Eloquent 无保护字段（所有字段可批量赋值）",
+            "language": "php"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "User::create($request->only(['name', 'email']))",
+            "description": "使用 only() 显式指定允许的字段"
+          },
+          {
+            "code": "protected $fillable = ['name', 'email', 'password'];",
+            "description": "定义 $fillable 白名单"
+          }
+        ]
+      },
+      {
+        "id": "laravel_raw_sql",
+        "title": "Raw SQL Injection",
+        "cwe_ids": ["CWE-89"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "DB::raw(\"SELECT * FROM users WHERE id = {$userInput}\")",
+            "description": "DB::raw 拼接用户输入",
+            "language": "php"
+          },
+          {
+            "code": "DB::select(\"SELECT * FROM users WHERE name = '{$name}'\")",
+            "description": "DB::select 字符串插值用户输入",
+            "language": "php"
+          },
+          {
+            "code": "whereRaw(\"column = {$input}\")",
+            "description": "whereRaw 拼接用户输入",
+            "language": "php"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "DB::select(\"SELECT * FROM users WHERE name = ?\", [$name])",
+            "description": "使用参数占位符"
+          },
+          {
+            "code": "User::where('name', $name)->get()",
+            "description": "使用 Eloquent ORM"
+          }
+        ]
+      },
+      {
+        "id": "laravel_debug_enabled",
+        "title": "Debug Mode in Production",
+        "cwe_ids": ["CWE-489"],
+        "owasp_ids": ["A05:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "APP_DEBUG=true",
+            "description": ".env 中 DEBUG 模式启用，暴露敏感 env 变量和 stack trace",
+            "language": "php"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "APP_DEBUG=false",
+            "description": "生产环境关闭 Debug"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 Laravel Sanctum/Passport 处理 API 认证",
+      "在 AppServiceProvider 中启用 ForceHttps",
+      "使用 Laravel 内置的 CSRF 保护",
+      "配置 .htaccess 阻止访问 .env 文件",
+      "使用 Eloquent ORM 避免 raw SQL"
+    ]
+  },
+  "react": {
+    "name": "React / Next.js",
+    "detection_patterns": [
+      "from 'react'",
+      "from \"react\"",
+      "next/",
+      "useState",
+      "useEffect"
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "react_dangerously_html",
+        "title": "dangerouslySetInnerHTML XSS",
+        "cwe_ids": ["CWE-79"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "<div dangerouslySetInnerHTML={{ __html: userInput }} />",
+            "description": "直接将用户输入渲染为 HTML，无任何转义",
+            "language": "javascript"
+          },
+          {
+            "code": "document.write(userInput)",
+            "description": "在组件中使用 document.write 写入用户内容",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "<div>{userInput}</div>",
+            "description": "React 默认 JSX 自动转义"
+          },
+          {
+            "code": "import DOMPurify from 'dompurify';\n<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />",
+            "description": "使用 DOMPurify 清理 HTML 后再渲染"
+          }
+        ]
+      },
+      {
+        "id": "react_ssr_injection",
+        "title": "Server-Side Rendering Injection",
+        "cwe_ids": ["CWE-79"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "high",
+        "patterns": [
+          {
+            "code": "const data = req.query.data;\nres.send(`<div>${data}</div>`)",
+            "description": "Next.js API Route / getServerSideProps 中直接渲染用户数据",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "const data = req.query.data;\nconst sanitized = escapeHtml(data);\nres.send(`<div>${sanitized}</div>`)",
+            "description": "使用 escapeHtml 转义后再渲染"
+          }
+        ]
+      },
+      {
+        "id": "react_unsafe_ref",
+        "title": "Unsafe URL via href/ref",
+        "cwe_ids": ["CWE-79"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "<a href={userInput}>Click</a>",
+            "description": "href 使用用户可控值，可注入 javascript: 协议",
+            "language": "javascript"
+          },
+          {
+            "code": "<iframe src={userUrl} />",
+            "description": "iframe src 来自用户输入",
+            "language": "javascript"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "const safeUrl = isValidUrl(userInput) ? userInput : '#';\n<a href={safeUrl}>Click</a>",
+            "description": "校验 URL 协议和域名后再使用"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用 React 默认 JSX 自动转义，避免 dangerouslySetInnerHTML",
+      "使用 CSP 头限制内联脚本和样式",
+      "使用 Next.js 的 next.config 配置安全头",
+      "避免在 href/src 等属性中使用未经校验的用户数据"
+    ]
+  },
+  "gin": {
+    "name": "Gin / Go",
+    "detection_patterns": [
+      "github.com/gin-gonic/gin",
+      "gin.Default()",
+      "gin.New()",
+      "gin.Context",
+      "c.JSON(",
+      "c.Bind("
+    ],
+    "dangerous_patterns": [
+      {
+        "id": "gin_sql_concat",
+        "title": "SQL Injection via String Concatenation",
+        "cwe_ids": ["CWE-89"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "db.Query(\"SELECT * FROM users WHERE id = \" + c.Param(\"id\"))",
+            "description": "字符串拼接用户输入的 SQL 查询",
+            "language": "go"
+          },
+          {
+            "code": "db.Exec(fmt.Sprintf(\"INSERT INTO posts VALUES ('%s')\", title))",
+            "description": "fmt.Sprintf 拼接 SQL",
+            "language": "go"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "db.Query(\"SELECT * FROM users WHERE id = $1\", c.Param(\"id\"))",
+            "description": "使用 PostgreSQL 参数占位符 $1"
+          },
+          {
+            "code": "db.Query(\"SELECT * FROM users WHERE id = ?\", c.Param(\"id\"))",
+            "description": "使用 MySQL 参数占位符 ?"
+          }
+        ]
+      },
+      {
+        "id": "gin_template_injection",
+        "title": "Server-Side Template Injection",
+        "cwe_ids": ["CWE-1336"],
+        "owasp_ids": ["A03:2021"],
+        "severity": "critical",
+        "patterns": [
+          {
+            "code": "tmpl.Execute(c.Writer, userInput)",
+            "description": "直接执行用户输入作为模板内容",
+            "language": "go"
+          },
+          {
+            "code": "template.Must(template.New(\"page\").Parse(userInput))",
+            "description": "Parse 用户输入构建模板",
+            "language": "go"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "tmpl.ExecuteTemplate(c.Writer, \"page\", safeData)",
+            "description": "使用预定义的模板文件"
+          }
+        ]
+      },
+      {
+        "id": "gin_open_redirect",
+        "title": "Open Redirect",
+        "cwe_ids": ["CWE-601"],
+        "owasp_ids": ["A10:2021"],
+        "severity": "medium",
+        "patterns": [
+          {
+            "code": "c.Redirect(http.StatusFound, c.Query(\"next\"))",
+            "description": "直接使用用户参数作为重定向目标",
+            "language": "go"
+          }
+        ],
+        "safe_alternatives": [
+          {
+            "code": "redirectURL := c.Query(\"next\")\nif isSafeURL(redirectURL, allowedHosts) {\n    c.Redirect(http.StatusFound, redirectURL)\n}",
+            "description": "校验重定向 URL 的域名白名单"
+          }
+        ]
+      }
+    ],
+    "security_best_practices": [
+      "使用参数化查询（database/sql 的 ? 或 $n 占位符）",
+      "使用 html/template 自动转义（非 text/template）",
+      "使用 gin-contrib 中间件：secure、cors、sessions",
+      "限制请求体大小（MaxMultipartMemory）",
+      "使用 validator 标签校验输入（binding: required 等）"
+    ]
+  }
+}

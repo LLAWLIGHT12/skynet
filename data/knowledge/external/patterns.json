@@ -1,0 +1,252 @@
+{
+  "patterns": [
+    {
+      "id": "jwt_alg_none",
+      "title": "JWT alg=none 攻击",
+      "description": "攻击者将 JWT 算法改为 none 绕过签名校验。",
+      "mitigation": "强制指定允许的算法列表（如 HS256/RS256），显式拒绝 none。",
+      "keywords": ["jwt", "none", "algorithm"],
+      "refs": ["CWE-287"]
+    },
+    {
+      "id": "race_double_spend",
+      "title": "竞态条件 / 双重支付",
+      "description": "并发请求绕过余额检查或库存锁定，导致业务逻辑漏洞。",
+      "mitigation": "使用数据库事务、乐观锁/悲观锁、幂等键。",
+      "keywords": ["race", "concurrent", "idempotent", "balance"],
+      "refs": ["A04:2021"]
+    },
+    {
+      "id": "idor",
+      "title": "不安全的直接对象引用",
+      "description": "通过修改 ID 参数访问他人资源。",
+      "mitigation": "服务端校验资源归属，不依赖客户端传入的 ID 做授权。",
+      "keywords": ["idor", "object", "reference", "user_id"],
+      "refs": ["A01:2021", "CWE-639"]
+    },
+    {
+      "id": "xxe",
+      "title": "XML 外部实体注入",
+      "description": "XML 解析器允许外部实体引用，攻击者可读取本地文件、发起 SSRF 或触发 DoS。",
+      "mitigation": "禁用 DTD 和外部实体解析；使用安全的 XML 解析器配置（如 defusedxml）；优先使用 JSON 格式。",
+      "keywords": ["xxe", "xml", "external", "entity", "dtd", "parser"],
+      "refs": ["CWE-611", "A05:2021"]
+    },
+    {
+      "id": "nosql_injection",
+      "title": "NoSQL 注入",
+      "description": "攻击者构造特殊的 NoSQL 查询操作符（$where、$regex、$ne）或注入 JavaScript 表达式绕过认证/授权。",
+      "mitigation": "使用参数化查询 API；强制转换输入为期望类型（如 String()）；使用 mongoose schema validation 或 mongo-sanitize。",
+      "keywords": ["nosql", "mongodb", "where", "regex", "ne", "injection"],
+      "refs": ["CWE-943", "A03:2021"]
+    },
+    {
+      "id": "graphql_injection",
+      "title": "GraphQL 注入与信息泄露",
+      "description": "攻击者通过嵌套查询进行深度递归 DoS、禁用 introspection 导致 schema 泄露、或通过 batching 绕过速率限制。",
+      "mitigation": "限制查询深度与复杂度；生产环境禁用 introspection；使用 query cost analysis 中间件；实施速率限制。",
+      "keywords": ["graphql", "introspection", "nesting", "depth", "query"],
+      "refs": ["CWE-770", "A04:2021"]
+    },
+    {
+      "id": "prototype_pollution",
+      "title": "原型污染",
+      "description": "攻击者通过控制 __proto__ 或 constructor.prototype 注入属性，影响所有对象的行为，可能导致 RCE 或权限绕过。",
+      "mitigation": "使用 Object.create(null) 创建无原型对象；冻结 Object.prototype；合并对象时过滤敏感 key（__proto__、constructor）；使用安全克隆库。",
+      "keywords": ["prototype", "pollution", "__proto__", "constructor", "merge", "assign"],
+      "refs": ["CWE-1321", "A03:2021"]
+    },
+    {
+      "id": "mass_assignment",
+      "title": "批量赋值 / 自动绑定",
+      "description": "框架自动将请求参数绑定到模型字段，攻击者设置非预期字段（如 is_admin=true）提权。",
+      "mitigation": "使用白名单明确允许的字段（如 Laravel $fillable、Spring @ModelAttribute 限定）；禁止直接使用 request.all() 更新模型。",
+      "keywords": ["mass", "assignment", "binding", "fillable", "auto", "attribute"],
+      "refs": ["CWE-915", "A01:2021"]
+    },
+    {
+      "id": "open_redirect",
+      "title": "开放重定向",
+      "description": "应用将用户可控的 URL 作为重定向目标，攻击者可用于钓鱼攻击或绕过 SSRF 防护。",
+      "mitigation": "使用白名单校验重定向目标域名；使用相对路径重定向；对用户提供的 URL 进行域名白名单匹配。",
+      "keywords": ["redirect", "url", "open", "next", "return", "callback"],
+      "refs": ["CWE-601", "A10:2021"]
+    },
+    {
+      "id": "cors_misconfig",
+      "title": "CORS 错误配置",
+      "description": "Access-Control-Allow-Origin 设置为 * 或反射 Origin 头，允许任意域读取敏感响应数据。",
+      "mitigation": "设置明确的允许源列表；不要反射 Origin 头到 Allow-Origin；使用 Vary: Origin 响应头；对敏感端点禁用 CORS。",
+      "keywords": ["cors", "origin", "cross-origin", "allow", "access-control"],
+      "refs": ["CWE-942", "A01:2021"]
+    },
+    {
+      "id": "crlf_injection",
+      "title": "CRLF 注入 / HTTP 响应分割",
+      "description": "攻击者在 HTTP 响应头中注入换行符（\\r\\n），插入恶意响应头或分割响应体，可用于 XSS 或缓存投毒。",
+      "mitigation": "过滤或编码用户输入中的 \\r 和 \\n 字符；使用框架提供的安全响应头设置方法；禁用自定义响应头的用户输入。",
+      "keywords": ["crlf", "carriage", "line", "feed", "response", "splitting", "header"],
+      "refs": ["CWE-93", "A03:2021"]
+    },
+    {
+      "id": "cache_poisoning",
+      "title": "Web 缓存投毒",
+      "description": "攻击者利用未列入缓存 key 的请求头（如 X-Forwarded-Host）注入恶意响应，使缓存服务器将毒化内容分发给其他用户。",
+      "mitigation": "审计缓存 key 中包含所有影响响应的请求头；不使用未验证的请求头生成响应内容；实施缓存 key 规范化。",
+      "keywords": ["cache", "poisoning", "host", "x-forwarded", "cdn", "varnish"],
+      "refs": ["CWE-444", "A04:2021"]
+    },
+    {
+      "id": "dependency_confusion",
+      "title": "依赖混淆攻击",
+      "description": "攻击者发布与内部包同名的公开包到公共仓库，构建系统可能拉取恶意包而非内部依赖。",
+      "mitigation": "使用私有 registry 并配置 scope 指向内部源；使用 lockfile 和完整性校验（npm integrity、pip hash）；禁止 fallback 到公共仓库。",
+      "keywords": ["dependency", "confusion", "package", "registry", "scope", "private"],
+      "refs": ["CWE-427", "A06:2021"]
+    },
+    {
+      "id": "smuggling",
+      "title": "HTTP 请求走私",
+      "description": "前端和后端服务器对 Content-Length / Transfer-Encoding 解析不一致，攻击者可在其他用户请求前插入恶意请求。",
+      "mitigation": "使用 HTTP/2 消除走私；统一前端后端服务器类型与配置；禁用 Transfer-Encoding chunked 与 Content-Length 同时使用。",
+      "keywords": ["smuggling", "content-length", "transfer-encoding", "chunked", "proxy"],
+      "refs": ["CWE-444", "A04:2021"]
+    },
+    {
+      "id": "crypto_weak_hash",
+      "title": "弱密码哈希算法",
+      "description": "使用 MD5、SHA1 或不加盐的哈希存储密码，攻击者可通过彩虹表或 GPU 暴力破解恢复明文。",
+      "mitigation": "使用 bcrypt、scrypt、Argon2 或 PBKDF2 等专为密码设计的慢哈希算法；使用随机 salt（每个用户独立）；设置足够的迭代次数/成本因子。",
+      "keywords": ["md5", "sha1", "hash", "password", "bcrypt", "argon2", "scrypt"],
+      "refs": ["CWE-327", "A02:2021"]
+    },
+    {
+      "id": "crypto_ecb_mode",
+      "title": "加密算法使用 ECB 模式",
+      "description": "ECB 模式对相同明文块产生相同密文块，不提供语义安全性，攻击者可识别数据模式甚至重放加密块。",
+      "mitigation": "使用 AES-GCM（认证加密）或 AES-CBC + HMAC；必须使用随机 IV（非固定值）；AES-ECB 仅用于教学，禁止生产使用。",
+      "keywords": ["ecb", "aes", "cipher", "gcm", "cbc", "iv"],
+      "refs": ["CWE-327", "A02:2021"]
+    },
+    {
+      "id": "crypto_hardcoded_iv",
+      "title": "硬编码或固定 IV/Nonce",
+      "description": "加密操作使用硬编码的初始化向量（IV）或重复使用相同 nonce，破坏加密的不可预测性，导致明文恢复或伪造攻击。",
+      "mitigation": "每次加密使用新的随机 IV（通过 crypto.randomBytes 或 secrets 模块生成）；IV 可公开但不可预测；GCM 模式下 nonce 严禁重复。",
+      "keywords": ["iv", "nonce", "hardcoded", "fixed", "random", "gcm", "cbc"],
+      "refs": ["CWE-1204", "A02:2021"]
+    },
+    {
+      "id": "ssti",
+      "title": "服务端模板注入",
+      "description": "用户输入直接拼接到模板中（如 Jinja2、Twig、Freemarker），攻击者可执行任意代码或读取服务器敏感数据。",
+      "mitigation": "禁止将用户输入传入模板编译器/渲染器；使用模板变量绑定而非字符串拼接；采用无逻辑模板引擎（如 Mustache）降低风险。",
+      "keywords": ["ssti", "template", "jinja2", "render", "freemarker", "twig", "velocity"],
+      "refs": ["CWE-1336", "A03:2021"]
+    },
+    {
+      "id": "deserialization_unsafe",
+      "title": "不安全的反序列化",
+      "description": "反序列化来自用户的数据（Python pickle、Java ObjectInputStream、PHP unserialize），攻击者可实例化恶意对象链实现 RCE。",
+      "mitigation": "禁止反序列化来自不可信源的序列化数据；使用 JSON/Protobuf 等纯数据格式；Python 使用 yaml.safe_load() 替代 yaml.load()；Java 使用白名单类过滤器。",
+      "keywords": ["deserialization", "unserialize", "pickle", "object", "gadget", "type"],
+      "refs": ["CWE-502", "A08:2021"]
+    },
+    {
+      "id": "business_logic_abuse",
+      "title": "业务逻辑滥用",
+      "description": "攻击者通过修改请求参数（价格、数量为负值）、重放请求、跳过步骤等操作，绕过业务规则实现欺诈。",
+      "mitigation": "服务端校验所有业务参数（价格、折扣、数量上下限）；使用状态机校验操作顺序；实施请求签名防重放；记录异常业务操作日志。",
+      "keywords": ["business", "logic", "price", "quantity", "replay", "state", "abuse"],
+      "refs": ["A04:2021"]
+    },
+    {
+      "id": "file_upload_unrestricted",
+      "title": "无限制文件上传",
+      "description": "未校验文件类型、后缀、MIME 类型或内容，攻击者可上传 Web Shell 或恶意可执行文件。",
+      "mitigation": "白名单校验文件类型（MIME type + 魔数）；限制文件大小；重命名上传文件（UUID 或 hash）；存储到非 web 可访问目录；扫描恶意内容。",
+      "keywords": ["upload", "file", "type", "mime", "web", "shell", "executable"],
+      "refs": ["CWE-434", "A04:2021"]
+    },
+    {
+      "id": "css_injection",
+      "title": "CSS 注入",
+      "description": "用户输入被插入到 <style> 标签或 style 属性中未转义，攻击者可通过 CSS 选择器窃取 CSRF token、读取表单内容。",
+      "mitigation": "对用户输入进行 CSS 转义（替换 \\、'、\" 等字符）；使用 Content-Security-Policy 限制 style-src；避免在 style 标签中使用用户控制的内容。",
+      "keywords": ["css", "injection", "style", "selector", "exfiltration"],
+      "refs": ["CWE-707", "A03:2021"]
+    },
+    {
+      "id": "ldap_injection",
+      "title": "LDAP 注入",
+      "description": "攻击者在 LDAP 查询中注入特殊字符（如 *、|、&），修改查询逻辑以绕过认证或提取未授权信息。",
+      "mitigation": "使用参数化 LDAP 查询或框架提供的安全 API；对用户输入中的 LDAP 特殊字符进行转义（\\、*、(、)、|、&）；实施最小权限原则。",
+      "keywords": ["ldap", "directory", "filter", "dn", "authentication", "query"],
+      "refs": ["CWE-90", "A03:2021"]
+    },
+    {
+      "id": "xpath_injection",
+      "title": "XPath 注入",
+      "description": "攻击者在 XPath 查询中注入条件表达式，绕过 XML 文档级别的访问控制或提取数据。",
+      "mitigation": "使用参数化 XPath 查询（XPath.setXPathVariable）；预编译 XPath 表达式；对用户输入转义 XPath 特殊字符（'、\"、=、<、>）。",
+      "keywords": ["xpath", "xml", "query", "expression", "predicate"],
+      "refs": ["CWE-643", "A03:2021"]
+    },
+    {
+      "id": "timing_attack",
+      "title": "时序攻击 / 侧信道",
+      "description": "攻击者通过测量操作响应时间推断机密信息（如密码逐字符匹配、API key 前缀枚举）。",
+      "mitigation": "使用恒定时间比较函数（hmac.compare_digest、crypto.timingSafeEqual）；避免提前返回的逐字符比较；对所有输入路径添加随机延迟。",
+      "keywords": ["timing", "side-channel", "compare", "constant", "leak"],
+      "refs": ["CWE-208"]
+    },
+    {
+      "id": "log_injection",
+      "title": "日志注入",
+      "description": "攻击者向日志输入中插入换行字符或特殊序列，伪造日志条目、破坏日志解析或注入恶意控制字符。",
+      "mitigation": "过滤或编码日志数据中的控制字符（\\n、\\r、\\t）；使用结构化日志格式（JSON）避免注入；禁止日志写入路径包含用户输入。",
+      "keywords": ["log", "injection", "forgery", "newline", "logging"],
+      "refs": ["CWE-117", "A09:2021"]
+    },
+    {
+      "id": "redos",
+      "title": "正则表达式拒绝服务",
+      "description": "正则表达式包含嵌套量词或回溯爆炸模式（如 (a+)+$），特定输入导致指数级回溯，耗尽 CPU 资源。",
+      "mitigation": "简化正则表达式避免嵌套量词；使用原子组 (?>... 或 possessive quantifiers ++；设置正则执行超时（如 .NET Regex.Match Timeout）；使用 ReDoS 检测工具。",
+      "keywords": ["regex", "redos", "backtrack", "exponential", "denial", "catastrophic"],
+      "refs": ["CWE-1333", "A04:2021"]
+    },
+    {
+      "id": "smtp_header_injection",
+      "title": "SMTP 邮件头注入",
+      "description": "攻击者在邮件相关字段（from、subject、body）中注入换行符和额外的 SMTP 头，追加 Bcc 收件人或修改邮件内容实现钓鱼。",
+      "mitigation": "过滤用户输入中的换行符（\\r\\n）和 %0a%0d；使用邮件库的安全 API（无需手动拼接头）；对邮件头值进行 RFC-2047 编码。",
+      "keywords": ["smtp", "email", "header", "injection", "bcc", "mail"],
+      "refs": ["CWE-93", "A03:2021"]
+    },
+    {
+      "id": "prompt_injection",
+      "title": "AI Prompt 注入",
+      "description": "攻击者在用户输入中嵌入控制系统指令的 prompt，绕过 AI 应用的安全限制或提取系统 prompt。",
+      "mitigation": "使用分隔符清晰划分用户输入与系统指令；对用户输入进行预处理和格式规范化；实施输入内容审查（检测 prompt injection 模式）；限制 LLM 输出格式。",
+      "keywords": ["prompt", "injection", "ai", "llm", "delimiter", "instruction", "ignore"],
+      "refs": ["CWE-1485", "LLM01:2025"]
+    },
+    {
+      "id": "ssrf_comprehensive",
+      "title": "SSRF 服务端请求伪造（完整模式）",
+      "description": "服务端根据用户提供的 URL 发起请求，攻击者可访问内网服务、云元数据端点（169.254.169.254）、或绕过防火墙访问内部 API。",
+      "mitigation": "实施 URL 协议白名单（仅允许 http/https）；禁用内网 IP 范围访问（10.x、172.16-31.x、192.168.x、127.x、169.254.x）；DNS 重绑定防护；使用独立出网代理。",
+      "keywords": ["ssrf", "request", "url", "metadata", "169.254", "internal", "proxy"],
+      "refs": ["CWE-918", "A10:2021"]
+    },
+    {
+      "id": "server_side_request_injection",
+      "title": "HTTP 参数污染 / 请求拆分",
+      "description": "攻击者注入额外的 HTTP 参数或请求路径，干扰后端路由逻辑或 API 调用链。包括参数覆盖（重复参数）、路径遍历变体、multipart 边界注入。",
+      "mitigation": "使用框架的标准参数绑定，避免手动拼接 URL 或查询字符串；唯一化重复参数名；校验参数存在性和类型。",
+      "keywords": ["parameter", "pollution", "hpp", "override", "duplicate", "query", "param"],
+      "refs": ["CWE-235", "A03:2021"]
+    }
+  ]
+}

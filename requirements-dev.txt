@@ -1,0 +1,5 @@
+# Skynet 开发/测试依赖
+# 安装：pip install -r requirements-dev.txt
+
+pytest>=7.0
+pytest-asyncio>=0.21.0

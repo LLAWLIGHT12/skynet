@@ -1,0 +1,166 @@
+{
+  "signals": [
+    {
+      "id": "sql_string_format",
+      "description": "SQL 字符串拼接或格式化",
+      "pattern": "(execute|executemany|raw)\\s*\\(\\s*f[\"']|\\.format\\s*\\(|%\\s*\\(|\\+\\s*['\"]",
+      "refs": ["CWE-89", "A03:2021"]
+    },
+    {
+      "id": "sql_execute_variable",
+      "description": "SQL execute 传入变量（非字面量）",
+      "pattern": "\\.(execute|executemany|raw)\\s*\\(\\s*[a-zA-Z_]",
+      "refs": ["CWE-89", "A03:2021"]
+    },
+    {
+      "id": "shell_invoke",
+      "description": "系统命令或 shell 调用",
+      "pattern": "(os\\.system|subprocess\\.|popen|exec\\(|shell=True)",
+      "refs": ["CWE-78", "A03:2021"]
+    },
+    {
+      "id": "path_join_user",
+      "description": "用户输入参与路径拼接",
+      "pattern": "(open|read|write|Path)\\s*\\([^)]*(request|input|params|args|user)",
+      "refs": ["CWE-22"]
+    },
+    {
+      "id": "hardcoded_secret",
+      "description": "硬编码密钥或密码",
+      "pattern": "(password|api_key|secret|token)\\s*=\\s*['\"][^'\"]{8,}",
+      "refs": ["CWE-200", "A02:2021"]
+    },
+    {
+      "id": "pickle_load",
+      "description": "反序列化不可信数据",
+      "pattern": "(pickle\\.loads|yaml\\.load\\(|unserialize)",
+      "refs": ["CWE-502"]
+    },
+    {
+      "id": "http_request_url",
+      "description": "HTTP 请求 URL 可能来自用户输入",
+      "pattern": "(requests\\.(get|post)|httpx\\.|fetch)\\s*\\([^)]*(url|user|input|param)",
+      "refs": ["CWE-918", "A10:2021"]
+    },
+    {
+      "id": "jwt_decode_no_verify",
+      "description": "JWT 未验证签名",
+      "pattern": "(jwt\\.decode|verify\\s*=\\s*False|algorithms\\s*=\\s*\\[?['\"]none)",
+      "refs": ["CWE-287", "A07:2021"]
+    },
+    {
+      "id": "eval_usage",
+      "description": "动态代码执行",
+      "pattern": "\\b(eval|exec)\\s*\\(",
+      "refs": ["CWE-94", "A03:2021"]
+    },
+    {
+      "id": "ssrf_user_url",
+      "description": "SSRF: 用户可控 URL 参与 HTTP 请求",
+      "pattern": "(requests\\.(get|post|put|delete|head|patch)|httpx\\.|fetch)\\s*\\([^)]*(request\\.(args|form|json|data|get)\\[|input\\(|req\\.params|user.*url|url.*user)",
+      "refs": ["CWE-918", "A10:2021"]
+    },
+    {
+      "id": "insecure_cookie",
+      "description": "Cookie 缺少 Secure/HttpOnly/SameSite 属性",
+      "pattern": "(set_cookie|set-cookie|response\\.cookie|res\\.cookie)\\\\s*\\(",
+      "refs": ["CWE-614", "A01:2021"]
+    },
+    {
+      "id": "graphql_endpoint",
+      "description": "GraphQL 端点暴露（可能开启 introspection）",
+      "pattern": "(apollo-server|express-graphql|GraphQL\\(|gql\\(|makeExecutableSchema|@nestjs\\/graphql|strawberry|graphene)",
+      "refs": ["CWE-200"]
+    },
+    {
+      "id": "csrf_token_missing",
+      "description": "表单或 API 缺少 CSRF token",
+      "pattern": "(@csrf_exempt|csrf\\s*=\\s*False|csrfProtection\\(\\s*\\)|middleware.*csrf.*false)",
+      "refs": ["CWE-352", "A01:2021"]
+    },
+    {
+      "id": "weak_crypto",
+      "description": "弱加密算法调用（DES/RC4/MD5/SHA1）",
+      "pattern": "\\b(md5|sha1|rc4|des\\b|arc4|3des)\\s*\\(",
+      "refs": ["CWE-327", "A02:2021"]
+    },
+    {
+      "id": "hardcoded_credential_variants",
+      "description": "硬编码凭证的更多变体（Bearer/Auth/私钥）",
+      "pattern": "(bearer\\s+[A-Za-z0-9_\\-]{16,}|private_key|app_secret|AUTH_TOKEN)\\s*=\\s*['\"][^'\"]{12,}",
+      "refs": ["CWE-798", "A02:2021"]
+    },
+    {
+      "id": "xxe_parser_unprotected",
+      "description": "XML 解析器未禁用外部实体",
+      "pattern": "(xml\\.etree\\.ElementTree|etree\\.parse|lxml\\.etree\\.parse|SAXParser|DocumentBuilder|XMLInputFactory)",
+      "refs": ["CWE-611", "A05:2021"]
+    },
+    {
+      "id": "unsafe_redirect",
+      "description": "不安全的重定向（redirect 参数来自用户）",
+      "pattern": "(redirect\\(|HttpResponseRedirect|res\\.redirect|location\\.href|window\\.location)[^)]*(request|params|query|args|user|input)",
+      "refs": ["CWE-601", "A10:2021"]
+    },
+    {
+      "id": "log_user_input",
+      "description": "日志中直接包含用户输入未过滤",
+      "pattern": "(logger|log|logging)\\.(debug|info|warn|error|critical)\\\\s*\\([^)]*(request|user|input|param|var)",
+      "refs": ["CWE-117", "A09:2021"]
+    },
+    {
+      "id": "regex_exponential",
+      "description": "正则表达式包含嵌套量词（可能的 ReDoS）",
+      "pattern": "\\(\\w+[+*]\\)[+*]|\\(\\w+[+*]\\w+[+*]\\)[+*]",
+      "refs": ["CWE-1333"]
+    },
+    {
+      "id": "file_upload_no_validate",
+      "description": "文件上传未进行类型/后缀校验",
+      "pattern": "(upload|saveFile|storeFile|putFile|move\\().*\\.(filename|originalname|name)",
+      "refs": ["CWE-434", "A04:2021"]
+    },
+    {
+      "id": "ldap_query_injection",
+      "description": "LDAP 查询拼接用户输入",
+      "pattern": "(ldap\\.search|ldap_search|search_s|search_ext|search_entry)[^)]*(user|input|param|query|filter)",
+      "refs": ["CWE-90", "A03:2021"]
+    },
+    {
+      "id": "xpath_query_injection",
+      "description": "XPath 查询拼接用户输入",
+      "pattern": "(xpath\\.|xpath_query|findvalue|findnodes|evaluate)[^)]*(user|input|param|query)",
+      "refs": ["CWE-643", "A03:2021"]
+    },
+    {
+      "id": "smtp_header_user",
+      "description": "SMTP 邮件头构建包含用户输入",
+      "pattern": "(sendmail|send_mail|EmailMessage|MIMEText)[^)]*(subject|to|from|cc|bcc).*(request|user|input)",
+      "refs": ["CWE-93"]
+    },
+    {
+      "id": "template_user_concat",
+      "description": "模板引擎使用用户输入拼接",
+      "pattern": "(render_template_string|Template\\(|template\\.render|velocity\\.evaluate)[^)]*(user|input|param|request)",
+      "refs": ["CWE-1336", "A03:2021"]
+    },
+    {
+      "id": "nosql_operator_injection",
+      "description": "NoSQL 查询使用用户输入构造操作符",
+      "pattern": "(\\$where|\\$regex|\\$ne|\\$gt|\\$lt)\\s*:\\s*(req\\.|body\\.|params\\.|query\\.)",
+      "refs": ["CWE-943", "A03:2021"]
+    },
+    {
+      "id": "mass_assignment_body",
+      "description": "模型批量赋值（all/save/update 直接注入请求体）",
+      "pattern": "(request\\.all\\(|request\\.input|request\\.json|req\\.body|request\\.data)\\s*\\).*\\.(save|update|create|bulkCreate|insert)",
+      "refs": ["CWE-915", "A01:2021"]
+    },
+    {
+      "id": "sql_like_concat",
+      "description": "SQL LIKE/ILIKE 查询拼接用户输入",
+      "pattern": "(LIKE|ILIKE)\\s*['\"].*[+%].*user|(LIKE|ILIKE).*f['\"].*{",
+      "refs": ["CWE-89", "A03:2021"]
+    }
+  ]
+}

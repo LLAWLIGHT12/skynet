@@ -1,0 +1,8 @@
+# Skynet Audit 管线额外依赖
+# 安装：pip install -r requirements-audit.txt
+
+# CLI 框架
+click>=8.0
+
+# 终端美化
+rich>=13.0

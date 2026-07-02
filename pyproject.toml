@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skynet-audit"
+version = "0.1.0"
+description = "Code knowledge graph based security audit system"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Skynet Contributors" }
+]
+dependencies = [
+  "loguru>=0.7.0",
+  "pyyaml>=6.0",
+  "pydantic>=2.0.0",
+  "python-dotenv>=1.0.0",
+  "networkx>=3.2",
+  "openai>=1.3.0",
+  "aiohttp>=3.8.0",
+  "duckduckgo-search>=6.0.0",
+  "jsonschema>=4.0",
+  "referencing>=0.30",
+  "code-review-graph[communities]>=2.3.6",
+  "multilspy>=0.1.0"
+]
+
+[project.optional-dependencies]
+audit = [
+  "click>=8.0",
+  "rich>=13.0"
+]
+dev = [
+  "pytest>=7.0",
+  "pytest-asyncio>=0.21.0"
+]
+
+[project.scripts]
+skynet = "main:main"
+skynet-audit = "skynet.audit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["skynet*"]

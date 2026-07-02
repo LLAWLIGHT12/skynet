@@ -1,0 +1,22 @@
+{
+  "sql": ["CWE-89", "A03:2021"],
+  "xss": ["CWE-79"],
+  "injection": ["CWE-89", "CWE-78", "A03:2021"],
+  "command": ["CWE-78", "A03:2021"],
+  "shell": ["CWE-78"],
+  "subprocess": ["CWE-78"],
+  "path": ["CWE-22"],
+  "traversal": ["CWE-22"],
+  "auth": ["CWE-287", "CWE-306", "A01:2021", "A07:2021"],
+  "authorization": ["CWE-306", "A01:2021"],
+  "access": ["CWE-306", "A01:2021"],
+  "leak": ["CWE-200"],
+  "disclosure": ["CWE-200"],
+  "ssrf": ["CWE-918", "A10:2021"],
+  "csrf": ["CWE-352"],
+  "deserial": ["CWE-502"],
+  "pickle": ["CWE-502"],
+  "logic": ["A04:2021"],
+  "race": ["A04:2021"],
+  "idempot": ["A04:2021"]
+}

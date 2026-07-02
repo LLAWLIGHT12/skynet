@@ -1,0 +1,53 @@
+# Per-stage configuration for Skynet Audit Agent.
+# Models: "default" → FALLBACK_LLM_MODEL_NAME from environment.
+# Tools: Skynet JSON actions (see skynet/tools/audit_tools.py).
+
+defaults:
+  model: default
+  max_turns: 25
+  permission_mode: acceptEdits
+  repair_attempts: 1
+
+stages:
+  recon:
+    model: default
+    concurrency: 1
+    tools: [read_file, grep, glob, list_dir, read_node]
+    max_turns: 40
+    repair_attempts: 2
+  hunt:
+    model: default
+    concurrency: 50
+    tools: [read_file, grep, glob, read_node]
+  validate:
+    model: default
+    concurrency: 10
+    tools: [read_file, grep, glob, read_node]
+  gapfill:
+    model: default
+    concurrency: 1
+    tools: [read_file, grep, glob, read_node]
+    repair_attempts: 2
+  dedupe:
+    model: default
+    concurrency: 1
+    tools: [read_file]
+  trace:
+    model: default
+    concurrency: 10
+    tools: [read_file, grep, glob, read_node]
+  feedback:
+    model: default
+    concurrency: 1
+    tools: [read_file, grep, glob, read_node]
+    repair_attempts: 2
+  report:
+    model: default
+    concurrency: 1
+    tools: [read_file]
+
+verify_enabled: false
+
+loops:
+  gapfill_iterations: 2
+  feedback_iterations: 1

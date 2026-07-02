@@ -1,0 +1,27 @@
+# Skynet 核心依赖
+
+# 日志
+loguru>=0.7.0
+
+# 配置与数据
+pyyaml>=6.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# 图谱引擎
+networkx>=3.2
+code-review-graph[communities]>=2.3.6
+
+# LLM 客户端
+openai>=1.3.0
+
+# HTTP / 搜索
+aiohttp>=3.8.0
+duckduckgo-search>=6.0.0
+
+# JSON Schema 验证
+jsonschema>=4.0
+referencing>=0.30
+
+# LSP 客户端 (Agent 补边)
+multilspy>=0.1.0

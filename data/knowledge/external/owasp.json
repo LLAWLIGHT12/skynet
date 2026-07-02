@@ -1,0 +1,44 @@
+{
+  "A01:2021": {
+    "name": "失效的访问控制",
+    "description": "访问控制限制未得到适当执行，导致越权。",
+    "mitigation": "默认拒绝访问，服务端强制鉴权，遵循最小权限原则。",
+    "keywords": ["access", "authorization", "idor", "privilege"]
+  },
+  "A02:2021": {
+    "name": "加密机制失效",
+    "description": "敏感数据缺乏或错误使用加密。",
+    "mitigation": "全链路加密，使用成熟算法与密钥管理，禁用弱算法。",
+    "keywords": ["crypto", "encryption", "tls", "hash"]
+  },
+  "A03:2021": {
+    "name": "注入",
+    "description": "用户输入被解释为命令或查询的一部分。",
+    "mitigation": "参数化查询、输入验证与输出编码。",
+    "keywords": ["injection", "sql", "command", "ldap"]
+  },
+  "A04:2021": {
+    "name": "不安全设计",
+    "description": "缺乏威胁建模与安全设计原则，导致逻辑漏洞。",
+    "mitigation": "设计阶段引入威胁建模与安全需求，关注业务逻辑滥用。",
+    "keywords": ["design", "logic", "business", "threat"]
+  },
+  "A05:2021": {
+    "name": "安全配置错误",
+    "description": "系统、框架或云配置不当。",
+    "mitigation": "安全基线、最小权限、定期审计配置。",
+    "keywords": ["config", "misconfiguration", "default"]
+  },
+  "A07:2021": {
+    "name": "身份识别与认证失败",
+    "description": "认证机制可被绕过或滥用。",
+    "mitigation": "多因素认证、账户锁定、安全的会话管理。",
+    "keywords": ["auth", "session", "credential", "brute"]
+  },
+  "A10:2021": {
+    "name": "服务端请求伪造",
+    "description": "应用可被利用访问内网或云元数据服务。",
+    "mitigation": "URL 校验、网络隔离、禁用不必要的出站请求。",
+    "keywords": ["ssrf", "request", "metadata"]
+  }
+}

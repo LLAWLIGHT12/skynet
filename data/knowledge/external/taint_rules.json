@@ -1,0 +1,66 @@
+{
+  "sources": [
+    {
+      "id": "http_request",
+      "description": "HTTP 请求参数或 body",
+      "pattern": "(request\\.(args|form|json|data|values|get|post)|req\\.(body|query|params)|request_data|@RequestParam|@RequestBody|@PathVariable)",
+      "tags": ["user_input", "state_read"]
+    },
+    {
+      "id": "cli_argv",
+      "description": "命令行参数",
+      "pattern": "(sys\\.argv|argparse|click\\.|getopt)",
+      "tags": ["user_input"]
+    },
+    {
+      "id": "file_read",
+      "description": "外部文件读取",
+      "pattern": "(open\\s*\\(|read_text|read_bytes|Files\\.upload)",
+      "tags": ["user_input"]
+    },
+    {
+      "id": "env_var",
+      "description": "环境变量",
+      "pattern": "(os\\.environ|getenv|process\\.env)",
+      "tags": ["user_input"]
+    },
+    {
+      "id": "socket_input",
+      "description": "网络/socket 输入",
+      "pattern": "(recv\\(|socket\\.read|stdin|(?<![_a-zA-Z])input\\s*\\()",
+      "tags": ["user_input"]
+    }
+  ],
+  "sanitizers": [
+    {
+      "id": "sql_parameterize",
+      "description": "SQL 参数化",
+      "pattern": "(\\?|%s|:\\w+|parameterized|bindparam|prepare)",
+      "depth": "strong"
+    },
+    {
+      "id": "escape_html",
+      "description": "HTML/输出转义",
+      "pattern": "(escape|htmlspecialchars|bleach|markupsafe|sanitize)",
+      "depth": "medium"
+    },
+    {
+      "id": "path_normalize",
+      "description": "路径规范化/白名单",
+      "pattern": "(realpath|abspath|basename|whitelist|allowed_path)",
+      "depth": "medium"
+    },
+    {
+      "id": "auth_check",
+      "description": "鉴权/权限检查",
+      "pattern": "(authenticate|authorize|permission|is_admin|check_auth|require_role|@login_required|@permission",
+      "depth": "strong"
+    },
+    {
+      "id": "input_validate",
+      "description": "输入校验",
+      "pattern": "(validate|validator|schema\\.parse|pydantic|isinstance|regex\\.match)",
+      "depth": "medium"
+    }
+  ]
+}

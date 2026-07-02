@@ -1,0 +1,212 @@
+{
+  "CWE-20": {
+    "name": "输入验证不当",
+    "description": "软件未正确验证输入，攻击者可构造特殊输入绕过安全限制。常见场景：缺少类型校验、未限制输入长度、未校验字符集。",
+    "mitigation": "实施严格的输入验证与白名单（类型、长度、字符集、范围）；在边界层（controller/filter）集中验证；使用框架验证器（Pydantic、Joi、class-validator）。",
+    "keywords": ["input", "validation", "sanitize", "whitelist", "boundary"]
+  },
+  "CWE-22": {
+    "name": "路径遍历",
+    "description": "通过 ../、..\\ 或绝对路径等特殊路径序列访问受限目录之外的文件。常见于文件下载/上传/读取功能中用户输入直接参与路径构建。",
+    "mitigation": "规范化路径后限制在基础目录内（realpath + 前缀检查）；使用 path.basename() 丢弃目录部分；禁止用户输入中包含 ../ ..\\ 序列。",
+    "keywords": ["path", "traversal", "directory", "../", "basename", "realpath"]
+  },
+  "CWE-78": {
+    "name": "OS 命令注入",
+    "description": "外部输入被拼接到系统命令中执行。常见模式：os.system(user_input)、subprocess.call(user_input, shell=True)、exec() 执行用户输入。",
+    "mitigation": "避免拼接命令字符串；使用参数化 API（subprocess.run([cmd, arg1, arg2])，禁止 shell=True）；实施命令白名单，拒绝传入自定义命令名。",
+    "keywords": ["command", "injection", "os", "shell", "subprocess", "exec"]
+  },
+  "CWE-79": {
+    "name": "跨站脚本",
+    "description": "应用程序接受用户数据并在未适当验证或编码的情况下发送到浏览器。包括反射型、存储型、DOM-based XSS 和 CSS/属性注入变体。",
+    "mitigation": "使用上下文相关的输出编码（HTML 实体编码、JS Unicode 编码、CSS 转义）；实施 CSP 头限制内联脚本和 eval；使用 DOMPurify 清理富文本。",
+    "keywords": ["xss", "cross-site", "script", "html", "injection", "csp", "encode"]
+  },
+  "CWE-89": {
+    "name": "SQL 注入",
+    "description": "SQL 命令包含来自外部源的未验证输入。攻击者可读取任意数据、修改/删除记录甚至执行系统命令（取决于数据库配置）。",
+    "mitigation": "使用参数化查询或预处理语句（? 或 $n 占位符），禁止 f-string、%s、+ 拼接 SQL；使用 ORM 的内置查询方法；对存储过程使用参数化调用。",
+    "keywords": ["sql", "injection", "query", "database", "parameterized", "prepared", "orm"]
+  },
+  "CWE-90": {
+    "name": "LDAP 注入",
+    "description": "攻击者在 LDAP 查询中注入特殊字符（*、|、&、(、)）修改查询逻辑，绕过认证或提取未授权信息。",
+    "mitigation": "使用 LDAP 参数化查询 API；对用户输入中的 LDAP 特殊字符进行转义（\\、*、(、)、|、&）；使用 DN 白名单而非用户指定的 DN。",
+    "keywords": ["ldap", "directory", "filter", "dn", "authentication"]
+  },
+  "CWE-93": {
+    "name": "CRLF 注入",
+    "description": "攻击者在 HTTP 响应头、邮件头或日志中注入回车换行符（CR/LF），实现响应头注入、HTTP 响应分割、日志伪造等攻击。",
+    "mitigation": "过滤或编码用户输入中的 \\r、\\n 及其 URL 编码形式（%0d%0a）；使用参数化的邮件/HTTP 库 API 避免头拼接。",
+    "keywords": ["crlf", "carriage", "line", "feed", "header", "splitting", "log"]
+  },
+  "CWE-94": {
+    "name": "代码注入",
+    "description": "攻击者控制的输入作为代码被 eval()、exec()、SpEL、EL 等表达式引擎或动态解释器执行。",
+    "mitigation": "禁止将用户输入传入任何代码执行函数；使用白名单映射（如 switch-case 代替 eval）；对不可避免的动态计算使用沙箱（如 RestrictedPython、WebAssembly）。",
+    "keywords": ["eval", "exec", "code", "injection", "spel", "expression"]
+  },
+  "CWE-117": {
+    "name": "日志输出未处理",
+    "description": "日志中包含未经处理的用户输入，攻击者可插入伪造日志或控制字符破坏日志解析、掩盖攻击痕迹。",
+    "mitigation": "过滤日志数据中的控制字符（\\n、\\r、\\t）；使用结构化日志格式（JSON、key=value）避免注入；禁止日志字段包含用户输入的原始内容。",
+    "keywords": ["log", "injection", "forgery", "newline", "logging", "structured"]
+  },
+  "CWE-200": {
+    "name": "信息泄露",
+    "description": "应用程序向未授权用户泄露敏感系统或用户数据。包括 error stack trace、调试信息、版本号、数据库 schema、环境变量。",
+    "mitigation": "生产环境禁用 debug 模式与详细错误信息；统一错误处理返回通用消息；禁止在响应中暴露堆栈 trace、服务器版本、框架标识。",
+    "keywords": ["leak", "disclosure", "exposure", "sensitive", "stack", "trace", "debug"]
+  },
+  "CWE-208": {
+    "name": "时序攻击",
+    "description": "攻击者通过测量操作响应时间差异推断机密信息。例如密码逐字符比较的提前返回、API key 前缀枚举。",
+    "mitigation": "使用恒定时间比较函数（hmac.compare_digest、crypto.timingSafeEqual）；避免逐字符比较的提前返回路径；对所有输入处理添加随机抖动延迟。",
+    "keywords": ["timing", "side-channel", "compare", "constant", "leak", "delay"]
+  },
+  "CWE-287": {
+    "name": "身份验证不当",
+    "description": "未正确验证用户身份即授予访问权限。包括 JWT alg=none 攻击、token 验证缺失、弱密码策略、多因素认证绕过。",
+    "mitigation": "强制指定 JWT 算法白名单（拒绝 none）；服务端校验每个请求的 token；实施强密码策略与多因素认证。",
+    "keywords": ["auth", "authentication", "login", "session", "jwt", "token", "password"]
+  },
+  "CWE-306": {
+    "name": "关键功能缺乏认证",
+    "description": "攻击者可在无需认证的情况下访问管理面板、API 端点、文件下载等关键功能或资源。",
+    "mitigation": "所有敏感操作必须在服务端强制鉴权；使用中间件/拦截器统一校验；避免仅依赖前端路由守卫做访问控制。",
+    "keywords": ["missing", "auth", "authorization", "access", "anonymous"]
+  },
+  "CWE-327": {
+    "name": "使用破损的加密算法",
+    "description": "使用已知被攻破或可暴力破解的加密/哈希算法。包括：MD5/SHA1 用于密码存储、AES-ECB 模式、DES/RC4 对称加密、固定 IV/Nonce。",
+    "mitigation": "密码哈希使用 bcrypt/scrypt/Argon2/PBKDF2（带随机 salt + 足够迭代次数）；对称加密使用 AES-GCM（认证加密）或 AES-CBC+HMAC；每次加密使用新的随机 IV。",
+    "keywords": ["md5", "sha1", "ecb", "des", "rc4", "hash", "crypto", "weak", "broken"]
+  },
+  "CWE-352": {
+    "name": "跨站请求伪造",
+    "description": "攻击者诱导已认证用户浏览器向目标应用发起非自愿请求，利用浏览器自动携带 Cookie 的特性进行状态变更操作。",
+    "mitigation": "使用 CSRF Token 校验每个状态变更请求；设置 SameSite Cookie（Strict/Lax）；校验 Origin/Referer 请求头；API 使用自定义请求头（X-Requested-With）。",
+    "keywords": ["csrf", "forgery", "cross-site", "token", "samesite"]
+  },
+  "CWE-434": {
+    "name": "无限制文件上传",
+    "description": "未校验上传文件的类型、后缀、MIME 类型或内容，攻击者可上传 Web Shell（.php/.jsp/.asp）、可执行文件或通过 polyglot 文件绕过检测。",
+    "mitigation": "白名单校验文件类型（检查魔数 + MIME type + 后缀一致）；限制文件大小；重命名为 UUID/随机名；存储到 web 非可访问目录；扫描病毒/恶意内容。",
+    "keywords": ["upload", "file", "type", "mime", "shell", "executable", "malware"]
+  },
+  "CWE-444": {
+    "name": "HTTP 请求走私/混淆",
+    "description": "前后端代理对 Content-Length / Transfer-Encoding 解析不一致，攻击者可毒化缓存或将请求路由到非预期用户上下文。",
+    "mitigation": "使用 HTTP/2 端到端消除走私；统一前后端服务器类型与版本；禁止同时使用 CL 和 TE 头；配置 WAF/代理规范化请求头。",
+    "keywords": ["smuggling", "content-length", "transfer-encoding", "chunked", "proxy"]
+  },
+  "CWE-489": {
+    "name": "生产环境残留调试代码",
+    "description": "生产环境启用了调试模式或残留调试端点，暴露配置、数据库连接、环境变量等敏感信息。",
+    "mitigation": "通过环境变量控制 debug 模式（禁止硬编码 True/False）；构建/部署时自动剥离调试路由；审计 CI/CD pipeline 确保生产配置覆盖。",
+    "keywords": ["debug", "production", "dev", "configuration", "environment"]
+  },
+  "CWE-502": {
+    "name": "反序列化不可信数据",
+    "description": "反序列化来自用户的数据（Python pickle、Java ObjectInputStream、PHP unserialize、PyYAML yaml.load），攻击者可构造恶意 gadget chain 实现 RCE。",
+    "mitigation": "禁止反序列化不可信数据源；使用 JSON/Protobuf 等纯数据格式；Python 使用 yaml.safe_load()；Java 使用白名单类过滤器（look-ahead）；.NET 使用 SerializationBinder。",
+    "keywords": ["deserialization", "pickle", "yaml", "unserialize", "gadget", "object"]
+  },
+  "CWE-601": {
+    "name": "开放重定向",
+    "description": "应用将用户可控的 URL 作为重定向目标，攻击者可用于钓鱼攻击（伪装域名重定向）或绕过 OAuth flow 的 redirect_uri 校验。",
+    "mitigation": "使用域名白名单校验重定向目标；优先使用相对路径重定向；对 OAuth/SAML 等流程使用精确匹配 redirect_uri。",
+    "keywords": ["redirect", "url", "open", "next", "callback", "return"]
+  },
+  "CWE-611": {
+    "name": "XML 外部实体注入",
+    "description": "XML 解析器允许外部实体引用（DOCTYPE、ENTITY），攻击者可读取本地文件、发起 SSRF 或触发 Billion Laughs DoS。",
+    "mitigation": "禁用 DTD 和外部实体解析（Java: setFeature DISALLOW_DOCTYPE_DECL；Python: defusedxml.ElementTree）；优先使用 JSON 替代 XML。",
+    "keywords": ["xxe", "xml", "external", "entity", "dtd", "parser", "billion", "laughs"]
+  },
+  "CWE-614": {
+    "name": "未设置 Cookie Secure 标记",
+    "description": "敏感 Cookie 未设置 Secure 标记，攻击者可通过中间人攻击或降级 HTTPS 窃取会话凭证。",
+    "mitigation": "对包含 session/token 的 Cookie 设置 Secure（仅 HTTPS 传输）、HttpOnly（禁止 JS 读取）、SameSite（防 CSRF）。",
+    "keywords": ["cookie", "secure", "httponly", "samesite", "session"]
+  },
+  "CWE-639": {
+    "name": "授权绕过（IDOR）",
+    "description": "系统通过用户可控的参数（如 ID、用户名）识别资源，但未验证该用户对资源的访问权限。",
+    "mitigation": "服务端校验资源归属（从 session 获取当前用户 ID，而非使用客户端传入的标识符）；使用 UUID 替代自增 ID 降低枚举风险。",
+    "keywords": ["idor", "authorization", "ownership", "resource", "enumeration"]
+  },
+  "CWE-643": {
+    "name": "XPath 注入",
+    "description": "攻击者在 XPath 查询中注入条件表达式，修改查询谓词以绕过 XML 文档级别的访问控制或提取数据。",
+    "mitigation": "使用参数化 XPath 变量（XPath.setXPathVariable）；预编译 XPath 表达式；转义用户输入中的 XPath 特殊字符。",
+    "keywords": ["xpath", "xml", "query", "expression", "predicate", "injection"]
+  },
+  "CWE-770": {
+    "name": "无限制资源分配",
+    "description": "攻击者利用未限制资源消耗的操作实现 DoS。如 GraphQL 深度嵌套查询、ZIP Bomb、解压缩炸弹、无限分页。",
+    "mitigation": "GraphQL: 限制查询深度/复杂度/别名数；文件上传: 限制大小和压缩比；分页: 强制最大 page size。",
+    "keywords": ["dos", "graphql", "depth", "complexity", "resource", "exhaustion"]
+  },
+  "CWE-798": {
+    "name": "硬编码凭证",
+    "description": "源代码中硬编码了密码、API Key、私钥、Token 等凭证，一旦代码泄漏或版本控制暴露，攻击者可获取这些凭证。",
+    "mitigation": "使用环境变量或密钥管理服务（AWS Secrets Manager/Vault）存储凭证；使用 .env 文件并从 .gitignore 排除；扫描 CI 中的硬编码检测。",
+    "keywords": ["hardcoded", "credential", "password", "secret", "token", "key"]
+  },
+  "CWE-915": {
+    "name": "批量赋值漏洞",
+    "description": "框架自动将请求参数绑定到模型/对象字段，攻击者设置非客户端预期字段（如 role=admin、isVerified=true）实现提权。",
+    "mitigation": "使用白名单定义允许绑定的字段（$fillable / @JsonIgnoreProperties / DTO）；禁止 request.all() 直接传入 ORM 操作；使用 MapStruct 等显式映射。",
+    "keywords": ["mass", "assignment", "binding", "fillable", "dto", "whitelist"]
+  },
+  "CWE-918": {
+    "name": "服务端请求伪造",
+    "description": "应用根据用户提供的 URL 发起请求，攻击者通过 SSRF 可访问内网服务、云 metadata 端点（169.254.169.254/AWS IMDS/GC metadata）、内部 API、或端口扫描。",
+    "mitigation": "实施 URL 协议白名单（仅 http/https）；禁止访问内网/回环 IP 范围（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16、127.0.0.0/8、169.254.0.0/16）；DNS 重绑定防护；使用独立出网代理。",
+    "keywords": ["ssrf", "request", "url", "metadata", "169.254", "internal", "proxy", "imds"]
+  },
+  "CWE-942": {
+    "name": "CORS 错误配置",
+    "description": "Access-Control-Allow-Origin 设置为 * 或反射请求 Origin 头，允许任意域跨域读取敏感响应。",
+    "mitigation": "设置明确的 Allow-Origin 域名白名单；不在 Access-Control-Allow-Origin 中反射 Origin；对敏感端点使用 Vary: Origin；禁止 Allow-Credentials 时使用 *。",
+    "keywords": ["cors", "origin", "cross-origin", "allow", "access-control", "credentials"]
+  },
+  "CWE-943": {
+    "name": "NoSQL 注入",
+    "description": "攻击者利用 NoSQL 查询操作符（MongoDB $where/$regex/$ne、CouchDB 视图注入）或 JavaScript 表达式注入操纵查询逻辑。",
+    "mitigation": "使用参数化 NoSQL 查询；强制转换输入为期望类型（如 String()、parseInt()）；使用 schema validation 和 mongoose plugins；使用 mongo-sanitize 移除 $ 和 . 操作符。",
+    "keywords": ["nosql", "mongodb", "where", "regex", "ne", "mongo", "couch"]
+  },
+  "CWE-1204": {
+    "name": "加密过程使用固定初始化向量",
+    "description": "加密操作使用硬编码的 IV 或重复使用相同 nonce，破坏语义安全性。GCM 模式下 nonce 重复可导致认证密钥恢复。",
+    "mitigation": "每次加密操作使用新的加密安全随机 IV（crypto.randomBytes）；GCM 模式下强烈建议使用 96-bit 随机 nonce；IV 可公开但不可预测、不可重复。",
+    "keywords": ["iv", "nonce", "hardcoded", "fixed", "random", "gcm", "reuse"]
+  },
+  "CWE-1321": {
+    "name": "原型污染",
+    "description": "JavaScript 中通过操控 __proto__ 或 constructor.prototype 注入属性，影响所有从该原型继承的对象行为。常发生于对象合并（merge/clone/extend）操作中。",
+    "mitigation": "使用 Object.create(null) 创建字典；冻结 Object.prototype；合并对象时过滤 __proto__/constructor/prototype 键名；使用安全 map（Map 而非 {}）。",
+    "keywords": ["prototype", "pollution", "__proto__", "constructor", "merge", "assign", "javascript"]
+  },
+  "CWE-1333": {
+    "name": "正则表达式拒绝服务（ReDoS）",
+    "description": "正则表达式包含导致指数级回溯的模式（如嵌套量词 (a+)+$、交替分支 (a|aa)+$），特定输入导致 CPU 耗尽。",
+    "mitigation": "避免嵌套量词和非确定性模式；使用原子组 (?>...) 或占有量词 ++/+；设置正则执行超时和输入长度上限；使用 ReDoS 检测工具。",
+    "keywords": ["regex", "redos", "backtrack", "exponential", "catastrophic", "quantifier"]
+  },
+  "CWE-1336": {
+    "name": "模板注入",
+    "description": "用户输入被传入模板引擎的编译/渲染函数（Jinja2 render_template_string、Twig createTemplate、Freemarker Template.process），攻击者可执行任意代码。",
+    "mitigation": "使用变量绑定而非字符串拼接模板；对不可避免的用户模板使用无逻辑模板引擎如 Mustache/Liquid；沙箱隔离模板执行环境。",
+    "keywords": ["ssti", "template", "jinja2", "render", "freemarker", "twig", "injection"]
+  },
+  "CWE-1485": {
+    "name": "AI Prompt 注入",
+    "description": "攻击者在用户输入中嵌入控制系统指令的自然语言 prompt，绕过 LLM 应用的安全限制、提取系统 prompt 或诱导模型执行恶意操作。",
+    "mitigation": "使用清晰的分隔符划分系统指令与用户输入；对输入进行 prompt injection 模式检测与过滤；限制 LLM 输出格式（JSON/结构化）；实施权限分离（LLM 无直接系统访问）。",
+    "keywords": ["prompt", "injection", "ai", "llm", "delimiter", "instruction", "ignore"]
+  }
+}
